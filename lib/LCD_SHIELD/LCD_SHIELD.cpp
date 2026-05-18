@@ -67,9 +67,8 @@ int LCD_tcl::ler_btn() {
     if (adc_tcl_entr < 650) { bip(); return 3; }
     if (adc_tcl_entr < 850) { bip(); return 4; }
 
-    // só chega aqui se estiver entre 850 e 1000
-    bip();
-    //return 5; // reset
+    // nenhum botão pressionado
+    return -1;
 }
 
 void LCD_tcl::imprimeLinha(uint8_t line, const char* text) {

@@ -13,6 +13,37 @@ O objetivo é enviar comandos estruturados do Arduino para o ESP32, garantindo c
 - Implementar máquina de estados para recepção confiável
 - Criar uma base modular para expansão futura
 
+-vai:
+
+   - gerenciar as cores do led interno do esp32s3, 
+   - pedir horas (da internet)
+   - pedir outras informaçoes
+
+## como vai funcionar?
+
+- o arduino inicializa e envia uma mensagem onde pede as horas para o outro lado, espera alguns segundos pela resposta, se nao vier, ele mostra que nao veio.
+- mostra a mensagem no display " Escolher a cor ";
+- coloca no display que estamos na cor red;
+- se continuar digitando para direita ou esquerda vai ficar rodando R,G, B;
+- inicia todas as cores em 0;
+- vai mostrar no display  R=0,G=0,B=0
+- uma vez escolhido a cor no display, aperta selecionar;
+- agora fica esperando digitar para cima ou para baixo;
+- cada vez que selecionar acima ou abaixo:
+   - começando em 0 (se teclar pra baixo nao faz nada);
+   - se teclar pra cima cada vez adiciona 10 e vai dando a intensidade de cor;
+   - dai se coloca um valor em cada letra de 0 a 255, dando no final uma cor
+   - terminando aperta selecionar, ao selecionar a variavel rgb é disponibilizada para a outra classe da uart enviar.
+   - o arduino vai esperar
+
+
+pode ser que seja interesante fazer uma lista com mais comandos, pegando
+
+
+
+
+
+
 ---
 
 ## 🧩 Hardware Utilizado
@@ -25,33 +56,8 @@ O objetivo é enviar comandos estruturados do Arduino para o ESP32, garantindo c
 
 ---
 
-## 🔌 Conexões UART
 
-| Arduino Uno | ESP32-S3 |
-|-------------|----------|
-| TX (D1)     | RX       |
-| RX (D0)     | TX       |
-| GND         | GND      |
 
-Baud rate recomendado: **115200**
-
----
-
-## 🧱 Estrutura do Protocolo UART
-
-Formato do pacote:
-
-```
-[0x7E][Tamanho][Tipo][Payload...][Checksum]
-```
-
-- **0x7E** → Start byte  
-- **Tamanho** → Número de bytes do payload  
-- **Tipo** → ID da mensagem  
-- **Payload** → Dados  
-- **Checksum** → CRC8 ou XOR simples  
-
----
 
 ## 📁 Estrutura do Projeto (PlatformIO)
 
@@ -68,40 +74,7 @@ platformio.ini
 
 ---
 
-## 🚀 Como compilar e executar
 
-1. Instale o **PlatformIO** no VS Code  
-2. Abra a pasta do projeto  
-3. Compile com **PlatformIO: Build**  
-4. Faça upload para o Arduino Uno  
-5. Faça upload do firmware correspondente no ESP32-S3  
-6. Abra o monitor serial para depuração
-
----
-
-## 🧪 Testes e Validação
-
-- Teste de envio contínuo de pacotes UART  
-- Teste de checksum inválido  
-- Teste de perda de start byte  
-- Teste de reconexão física (TX/RX)  
-- Teste de ruído no canal serial  
-
----
-
-## 📜 Licença
-
-Este projeto está sob a licença **MIT**.  
-Você pode usar, modificar e distribuir livremente.
-
----
-
-## 🤝 Contribuições
-
-Contribuições são bem-vindas.  
-Para mudanças maiores, abra uma *issue* antes para discutirmos o que deseja alterar.
-
----
 
 ## 📬 Contato
 
