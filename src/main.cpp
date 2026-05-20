@@ -17,6 +17,10 @@ uint8_t corSelecionada = 0;
 int valorAjuste = 0;
 unsigned long tempoEnvio = 0;
 
+const unsigned long SELECT_DOUBLE_CLICK_MS = 250;
+unsigned long lastSelectPressTime = 0;
+bool selectPending = false;
+
 const char* nomesCores[] = {"RED", "GRN", "BLU"};
 
 void mostrarStatus() {
@@ -68,10 +72,25 @@ void loop() {
         } else if (btn == 3) {
             corSelecionada = (corSelecionada + 2) % 3;
             mostrarStatus();
+        } else if (btn == 1) {
+            enviarRGB();
         } else if (btn == 4) {
-            valorAjuste = rgb[corSelecionada];
-            estadoAtual = AJUSTAR_VALOR;
-            mostrarAjuste();
+            // Detecta duplo-clique no botão Select (btn==4)
+            if (!selectPending) {
+                selectPending = true;
+                lastSelectPressTime = millis();
+                LCD_RM.imprimeLinha(0, "1x: Ajustar");
+                LCD_RM.imprimeLinha(1, "2x: Enviar");
+            } else {
+                // segundo clique dentro do intervalo -> enviar
+                if (millis() - lastSelectPressTime <= SELECT_DOUBLE_CLICK_MS) {
+                    selectPending = false;
+                    enviarRGB();
+                } else {
+                    // tempo estourou, reinicia contagem
+                    lastSelectPressTime = millis();
+                }
+            }
         }
     } else if (estadoAtual == AJUSTAR_VALOR) {
         if (btn == 1) {
@@ -85,7 +104,8 @@ void loop() {
             mostrarStatus();
         } else if (btn == 4) {
             rgb[corSelecionada] = valorAjuste;
-            enviarRGB();
+            estadoAtual = ESCOLHER_COR;
+            mostrarStatus();
         }
     } else if (estadoAtual == AGUARDAR_RESPOSTA) {
         uint8_t tipo;
@@ -112,6 +132,17 @@ void loop() {
             delay(1000);
             estadoAtual = ESCOLHER_COR;
             mostrarStatus();
+        }
+    }
+
+    // Se houve um único clique no Select e o tempo de duplo-clique expirou,
+    // trata-se como clique simples: entra em ajuste.
+    if (estadoAtual == ESCOLHER_COR && selectPending) {
+        if (millis() - lastSelectPressTime > SELECT_DOUBLE_CLICK_MS) {
+            selectPending = false;
+            valorAjuste = rgb[corSelecionada];
+            estadoAtual = AJUSTAR_VALOR;
+            mostrarAjuste();
         }
     }
 
